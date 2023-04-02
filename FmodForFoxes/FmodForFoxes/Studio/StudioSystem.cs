@@ -1,4 +1,5 @@
 ﻿using System;
+using FMOD;
 
 namespace FmodForFoxes.Studio
 {
@@ -12,30 +13,37 @@ namespace FmodForFoxes.Studio
 		/// <summary>
 		/// Loads bank from file with the default flag.
 		/// </summary>
-		public static Bank LoadBank(string name) =>
+		public static Bank? LoadBank(string name) =>
 			LoadBank(name, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL);
 
 		/// <summary>
 		/// Loads bank from file with custom flags.
 		/// </summary>
-		public static Bank LoadBank(string path, FMOD.Studio.LOAD_BANK_FLAGS flags)
+		public static Bank? LoadBank(string path, FMOD.Studio.LOAD_BANK_FLAGS flags)
 		{
-			Native.loadBankMemory(
+			var result = Native.loadBankMemory(
 				FileLoader.LoadFileAsBuffer(path),
 				flags,
 				out FMOD.Studio.Bank bank
 			);
 
-			return new Bank(bank);
+			if (result == RESULT.OK)
+				return new Bank(bank);
+			else
+				return null;
 		}
 
 		/// <summary>
 		/// Retrieves an event via internal path, i.e. "event:/UI/Cancel", or ID string, i.e. "{2a3e48e6-94fc-4363-9468-33d2dd4d7b00}".
 		/// </summary>
-		public static EventDescription GetEvent(string path)
+		public static EventDescription? GetEvent(string path)
 		{
-			Native.getEvent(path, out FMOD.Studio.EventDescription eventDescription);
-			return new EventDescription(eventDescription);
+			var result = Native.getEvent(path, out FMOD.Studio.EventDescription eventDescription);
+
+			if (result == RESULT.OK)
+				return new EventDescription(eventDescription);
+
+			return null;
 		}
 
 		/// <summary>
@@ -166,6 +174,6 @@ namespace FmodForFoxes.Studio
 		/// </summary>
 		public static void SetParameterValues(FMOD.Studio.PARAMETER_ID[] ids, float[] values, bool ignoreSeekSpeed = false) =>
 			Native.setParametersByIDs(ids, values, ids.Length, ignoreSeekSpeed);
-		
+
 	}
 }
